@@ -1,23 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { API } from "aws-amplify";
+
+import "./App.css";
 
 function App() {
+  const [showResult, setShowResult] = useState(false);
+  const [apiMessage, setApiMessage] = useState("");
+  const [name, setName] = useState("");
+
+  const wasGreeted = async () => {
+    const response = await API.get("greetingsEndpoint", "/hello", {
+      queryStringParameters: {
+        name: name,
+      },
+    });
+
+    setShowResult(true);
+    setApiMessage(response);
+  };
+
+  const greet = async () => {
+    await API.post("greetingsEndpoint", "/hello", {
+      queryStringParameters: {
+        name: name,
+      },
+    });
+
+    setShowResult(true);
+    setApiMessage(`Hola ${name}`);
+  };
+
+  const handleChange = (e) => {
+    setName(e.target.value);
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Greeter</h1>
+        <input type="text" onChange={handleChange} />
+        <button onClick={wasGreeted}>Was greeted?</button>
+        <button onClick={greet}>Greet</button>
+        <div>
+          {showResult && <code>{JSON.stringify(apiMessage, null, 2)}</code>}
+        </div>
       </header>
     </div>
   );
